@@ -54,7 +54,6 @@ Object.entries(FIGHTERS).forEach(([id, data]) => {
 
   rosterGrid.appendChild(tile);
 });
-
 class StickFighter {
   constructor(id, x, isPlayer1) {
     this.isPlayer1 = isPlayer1;
@@ -205,7 +204,6 @@ class StickFighter {
       }
     }
   }
-
   draw() {
     ctx.save();
     ctx.strokeStyle = this.stats.color;
@@ -333,3 +331,214 @@ window.addEventListener("keydown", (e) => {
   if (k === "k" || k === "x") inputState.specialPressed = true;
 });
 window.addEventListener("keyup", (e) => {
+  const k = e.key.toLowerCase();
+  if (k === "a" || e.key === "ArrowLeft") inputState.left = false;
+  if (k === "d" || e.key === "ArrowRight") inputState.right = false;
+  if (k === "s" || e.key === "ArrowDown") inputState.down = false;
+});
+
+// Simple CPU AI for Solo Mode
+function getCpuKeys(bot, target) {
+  const keys = { left: false, right: false, down: false, jumpPressed: false, normalPressed: false, specialPressed: false };
+  if (!soloCpuEnabled) return keys;
+
+  const dx = target.x - bot.x;
+  const dy = target.y - bot.y;
+
+  // Recover if falling off stage
+  if (bot.x < 220) keys.right = true;
+  else if (bot.x > 780) keys.left = true;
+  else if (Math.abs(dx) > 55) {
+    if (dx > 0) keys.right = true;
+    else keys.left = true;
+  }
+
+  if ((bot.y > 410 || dy < -60) && Math.random() < 0.08) keys.jumpPressed = true;
+  if (Math.abs(dx) < 65 && Math.abs(dy) < 45 && Math.random() < 0.08) keys.normalPressed = true;
+  if (Math.abs(dx) >= 140 && Math.abs(dx) < 350 && Math.random() < 0.03) keys.specialPressed = true;
+
+  return keys;
+}
+// Webcam & Copy ID Buttons
+let localStream = null;
+document.getElementById("camBtn").onclick = async () => {
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    document.getElementById("localVideo").srcObject = localStream;
+    document.getElementById("camBtn").textContent = "Webcam Active";
+  } catch (err) {
+    alert("Could not access Chromebook camera. Check browser permissions.");
+  }
+};
+
+document.getElementById("copyBtn").onclick = () => {
+  const idText = document.getElementById("myId").textContent;
+  navigator.clipboard.writeText(idText);
+  document.getElementById("copyBtn").textContent = "Copied!";
+  setTimeout(() => (document.getElementById("copyBtn").textContent = "Copy ID"), 1500);
+};
+
+// PeerJS Chromebook Multiplayer
+const peer = new Peer();
+let conn = null;
+let isHost = true;
+let isMultiplayer = false;
+
+peer.on("open", (id) => {
+  document.getElementById("myId").textContent = id;
+});
+
+peer.on("connection", (incomingConn) => {
+  conn = incomingConn;
+  isHost = true;
+  isMultiplayer = true;
+  setupConnectionHandlers();
+  startGame();
+});
+
+peer.on("call", (call) => {
+  call.answer(localStream);
+  call.on("stream", (remoteStream) => {
+    document.getElementById("remoteVideo").srcObject = remoteStream;
+  });
+});
+
+document.getElementById("connectBtn").onclick = () => {
+  const friendId = document.getElementById("joinIdInput").value.trim();
+  if (!friendId) return;
+  isHost = false;
+  isMultiplayer = true;
+  conn = peer.connect(friendId);
+  setupConnectionHandlers();
+  if (localStream) {
+    const call = peer.call(friendId, localStream);
+    call.on("stream", (remoteStream) => {
+      document.getElementById("remoteVideo").srcObject = remoteStream;
+    });
+  }
+  startGame();
+};
+
+document.getElementById("soloBtn").onclick = () => {
+  isHost = true;
+  isMultiplayer = false;
+  const keys = Object.keys(FIGHTERS);
+  const randomOpponent = keys[Math.floor(Math.random() * keys.length)];
+  p2.setFighter(randomOpponent);
+  startGame();
+};
+
+document.getElementById("rematchBtn").onclick = () => {
+  document.getElementById("resultsScreen").classList.add("hidden");
+  document.getElementById("hud").classList.add("hidden");
+  document.getElementById("lobby").classList.remove("hidden");
+};
+
+function setupConnectionHandlers() {
+  conn.on("open", () => {
+    conn.send({ type: "fighter", id: selectedFighterId });
+  });
+  conn.on("data", (data) => {
+    if (data.type === "fighter") {
+      (isHost ? p2 : p1).setFighter(data.id);
+    } else if (data.type === "input" && isHost) {
+      p2.applyInput(data.keys);
+    } else if (data.type === "state" && !isHost) {
+      Object.assign(p1, data.p1);
+      Object.assign(p2, data.p2);
+      p1.setFighter(data.p1.fighterId);
+      p2.setFighter(data.p2.fighterId);
+      projectiles = data.projectiles;
+    }
+  });
+}
+
+function startGame() {
+  matchStocks = parseInt(document.getElementById("stockSelect").value, 10);
+  currentStage = document.getElementById("stageSelect").value;
+  soloCpuEnabled = document.getElementById("cpuSelect").value === "cpu";
+
+  (isHost ? p1 : p2).setFighter(selectedFighterId);
+  p1.reset(true);
+  p2.reset(true);
+  projectiles = [];
+
+  document.getElementById("p1NameHud").textContent = p1.stats.name;
+  document.getElementById("p2NameHud").textContent = p2.stats.name;
+  document.getElementById("lobby").classList.add("hidden");
+  document.getElementById("hud").classList.remove("hidden");
+
+  if (!gameRunning) {
+    gameRunning = true;
+    requestAnimationFrame(gameLoop);
+  }
+}
+
+function gameLoop() {
+  if (!gameRunning) return;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw Selected Stage
+  const platforms = STAGES[currentStage] || STAGES.battlefield;
+  for (const p of platforms) {
+    ctx.fillStyle = p.solid ? "#576574" : "#8395a7";
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+  }
+
+  if (isHost) {
+    p1.applyInput(inputState);
+    if (!isMultiplayer) {
+      p2.applyInput(getCpuKeys(p2, p1));
+    }
+    p1.update(p2);
+    p2.update(p1);
+
+    // Update Projectiles
+    projectiles.forEach((proj) => {
+      proj.x += proj.vx;
+      proj.life--;
+      const target = proj.owner === p1 ? p2 : p1;
+      if (Math.abs(proj.x - target.x) < 25 && Math.abs(proj.y - (target.y - 30)) < 35) {
+        applySmashKnockback(target, proj.damage, Math.sign(proj.vx), proj.owner);
+        proj.life = 0;
+      }
+    });
+    projectiles = projectiles.filter((p) => p.life > 0);
+
+    // Sync state to P2 Chromebook
+    if (conn && conn.open) {
+      conn.send({
+        type: "state",
+        p1: { x: p1.x, y: p1.y, facing: p1.facing, percent: p1.percent, stocks: p1.stocks, attackTimer: p1.attackTimer, shielding: p1.shielding, counterTimer: p1.counterTimer, animFrame: p1.animFrame, fighterId: p1.fighterId },
+        p2: { x: p2.x, y: p2.y, facing: p2.facing, percent: p2.percent, stocks: p2.stocks, attackTimer: p2.attackTimer, shielding: p2.shielding, counterTimer: p2.counterTimer, animFrame: p2.animFrame, fighterId: p2.fighterId },
+        projectiles: projectiles.map(({ x, y, color }) => ({ x, y, color }))
+      });
+    }
+  } else if (conn && conn.open) {
+    conn.send({ type: "input", keys: { ...inputState } });
+  }
+
+  inputState.jumpPressed = false;
+  inputState.normalPressed = false;
+  inputState.specialPressed = false;
+
+  // Render Projectiles & Fighters
+  projectiles.forEach((proj) => {
+    ctx.fillStyle = proj.color;
+    ctx.beginPath();
+    ctx.arc(proj.x, proj.y, 8, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  p1.draw();
+  p2.draw();
+
+  // Update Smash HUD
+  document.getElementById("p1PercentHud").textContent = `${Math.floor(p1.percent)}%`;
+  document.getElementById("p2PercentHud").textContent = `${Math.floor(p2.percent)}%`;
+  document.getElementById("p1StocksHud").textContent = "●".repeat(Math.max(0, p1.stocks));
+  document.getElementById("p2StocksHud").textContent = "●".repeat(Math.max(0, p2.stocks));
+
+  requestAnimationFrame(gameLoop);
+}
