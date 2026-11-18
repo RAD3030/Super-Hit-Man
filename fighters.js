@@ -40,4 +40,5 @@ const FIGHTERS = {
   "39_charizard": { name: "39. Flame Dragon", color: "#e67e22", hat: "none", weapon: "none", speed: 5.4, jumpForce: 12.5, weight: 1.24, maxJumps: 3, normalDamage: 12, specialType: "dash", specialColor: "#ff5252", specialDamage: 17 },
   "40_diddy": { name: "40. Peanut Monkey", color: "#c0392b", hat: "cap", weapon: "blaster", speed: 6.6, jumpForce: 13.8, weight: 0.88, maxJumps: 2, normalDamage: 8, specialType: "projectile", specialColor: "#e67e22", specialDamage: 10 },
   "41_lucas": { name: "41. PK Boy", color: "#f39c12", hat: "none", weapon: "none", speed: 5.1, jumpForce: 13.2, weight: 0.94, maxJumps: 2, normalDamage: 9, specialType: "projectile", specialColor: "#74b9ff", specialDamage: 13 },
-  "42_sonic": { name: "42. Blue Hedgehog", color: "#0984e3", hat: "pointy", weapon: "none", speed: 8.4, jumpForce: 14, weight: 0.86, maxJumps: 2, normalDamage: 7, specialType: "dash", specialColor: "#74b9ff", specialDamage: 11 },
+  "42_sonic": { name: "42. Blue Hedgehog", color: "#0984e3", hat: "pointy", weapon: "none", speed: 8.4, jumpForce: 14, weight: 0.86, maxJumps: 2, normalDamage: 7, specialType: "dash", specialColor: "#74b9ff", specialDamage: 11 }
+};
