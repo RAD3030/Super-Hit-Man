@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Super Hit Men Ultimate</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://unpkg.com"></script>
+</head>
+<body>
+
+  <!-- SMASH-STYLE MAIN MENU & CHARACTER SELECT -->
+  <div id="lobby">
+    <header class="menu-header">
+      <h1>SUPER HIT MEN <span>ULTIMATE</span></h1>
+      <div class="rules-bar">
+        <label>Stocks:
+          <select id="stockSelect">
+            <option value="1">1 Stock</option>
+            <option value="3" selected>3 Stocks</option>
+            <option value="5">5 Stocks</option>
+          </select>
+        </label>
+        <label>Stage:
+          <select id="stageSelect">
+            <option value="battlefield" selected>Battlefield (3 Platforms)</option>
+            <option value="final">Final Destination (Flat)</option>
+            <option value="towers">Twin Towers (High Platforms)</option>
+          </select>
+        </label>
+        <label>Solo Mode:
+          <select id="cpuSelect">
+            <option value="cpu" selected>Vs. CPU Bot</option>
+            <option value="dummy">Training Dummy</option>
+          </select>
+        </label>
+      </div>
+    </header>
+
+    <!-- 89-CHARACTER ROSTER GRID -->
+    <div id="rosterGrid" class="roster-grid"></div>
+
+    <!-- SELECTED FIGHTER PREVIEW & MULTIPLAYER LOBBY -->
+    <div class="bottom-panel">
+      <div class="selected-card">
+        <div class="badge p1-badge">P1</div>
+        <div>
+          <h2 id="selectedName">01. Red Plumber Hitman</h2>
+          <p id="selectedStats">Speed: 5.5 | Weight: 1.0 | Special: Projectile</p>
+        </div>
+      </div>
+
+      <div class="network-controls">
+        <div class="room-box">
+          <span>Room ID: <strong id="myId">Connecting...</strong></span>
+          <button id="copyBtn" class="btn-secondary">Copy ID</button>
+          <button id="camBtn" class="btn-secondary">Enable Webcam</button>
+        </div>
+        <div class="action-box">
+          <input type="text" id="joinIdInput" placeholder="Paste Friend's Room ID" />
+          <button id="connectBtn" class="btn-blue">Join Friend</button>
+          <button id="soloBtn" class="btn-red">READY TO FIGHT!</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="controls-hint">
+      <strong>Controls:</strong> A/D or Arrows: Move | W/Up/Space: Jump | S/Down: Shield | J/Z: Normal Attack | K/X: Special Power
+    </p>
+  </div>
+
+  <!-- WEBCAM OVERLAYS -->
+  <div id="camContainer">
+    <div class="cam-box p1-cam">
+      <video id="localVideo" autoplay muted playsinline></video>
+      <span>P1 (You)</span>
+    </div>
+    <div class="cam-box p2-cam">
+      <video id="remoteVideo" autoplay playsinline></video>
+      <span>P2 (Opponent)</span>
+    </div>
+  </div>
+
+  <!-- SMASH-STYLE DAMAGE HUD -->
+  <div id="hud" class="hidden">
+    <div class="hud-card p1-card">
+      <div class="hud-name" id="p1NameHud">P1</div>
+      <div class="hud-percent" id="p1PercentHud">0%</div>
+      <div class="hud-stocks" id="p1StocksHud">●●●</div>
+    </div>
+    <div class="hud-card p2-card">
+      <div class="hud-name" id="p2NameHud">P2</div>
+      <div class="hud-percent" id="p2PercentHud">0%</div>
+      <div class="hud-stocks" id="p2StocksHud">●●●</div>
+    </div>
+  </div>
+
+  <!-- RESULTS OVERLAY -->
+  <div id="resultsScreen" class="hidden">
+    <h1 id="winnerText">GAME!</h1>
+    <button id="rematchBtn" class="btn-red">Back to Character Select</button>
+  </div>
+
+  <canvas id="gameCanvas" width="1000" height="560"></canvas>
+
+  <script src="fighters.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
