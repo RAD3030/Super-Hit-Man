@@ -10,48 +10,58 @@
 <body>
   <!-- Character Select & Lobby -->
   <div id="lobby">
-    <h1>SUPER HIT MEN ULTIMATE</h1>
+    <div class="menu-header">
+      <h1>SUPER HIT MEN <span>ULTIMATE</span></h1>
 
-    <div class="match-settings">
-      <label>Stocks:
-        <select id="stockSelect">
-          <option value="1">1 Stock</option>
-          <option value="3" selected>3 Stocks</option>
-          <option value="5">5 Stocks</option>
-        </select>
-      </label>
+      <div class="rules-bar">
+        <label>Stocks:
+          <select id="stockSelect">
+            <option value="1">1 Stock</option>
+            <option value="3" selected>3 Stocks</option>
+            <option value="5">5 Stocks</option>
+          </select>
+        </label>
 
-      <label>Stage:
-        <select id="stageSelect">
-          <option value="battlefield" selected>Battlefield (3 Platforms)</option>
-          <option value="final">Final Destination (Flat)</option>
-          <option value="towers">Twin Towers (High Platforms)</option>
-        </select>
-      </label>
+        <label>Stage:
+          <select id="stageSelect">
+            <option value="battlefield" selected>Battlefield (3 Platforms)</option>
+            <option value="final">Final Destination (Flat)</option>
+            <option value="towers">Twin Towers (High Platforms)</option>
+          </select>
+        </label>
 
-      <label>Solo Mode:
-        <select id="cpuSelect">
-          <option value="cpu" selected>Vs. CPU Bot</option>
-          <option value="dummy">Training Dummy</option>
-        </select>
-      </label>
+        <label>Solo Mode:
+          <select id="cpuSelect">
+            <option value="cpu" selected>Vs. CPU Bot</option>
+            <option value="dummy">Training Dummy</option>
+          </select>
+        </label>
+      </div>
     </div>
 
-    <div id="rosterGrid"></div>
+    <div id="rosterGrid" class="roster-grid"></div>
 
-    <div class="selected-preview">
-      <span class="p1-badge">P1</span>
-      <h2 id="selectedName">01. Red Plumber</h2>
-      <p id="selectedStats">Speed: 5.5 | Weight: 1.0 | Jumps: 2 | Special: PROJECTILE</p>
-    </div>
+    <div class="bottom-panel">
+      <div class="selected-card">
+        <span class="badge p1-badge">P1</span>
+        <div>
+          <h2 id="selectedName">01. Red Plumber</h2>
+          <p id="selectedStats">Speed: 5.5 | Weight: 1.0 | Jumps: 2 | Special: PROJECTILE</p>
+        </div>
+      </div>
 
-    <div class="multiplayer-bar">
-      <span>Room ID: <strong id="myId">Connecting...</strong></span>
-      <button id="copyBtn">Copy ID</button>
-      <button id="camBtn">Enable Webcam</button>
-      <input id="joinIdInput" type="text" placeholder="Friend's Room ID" />
-      <button id="connectBtn">Join Friend</button>
-      <button id="soloBtn">READY TO FIGHT!</button>
+      <div class="network-controls">
+        <div class="room-box">
+          <span>Room ID: <strong id="myId">Connecting...</strong></span>
+          <button id="copyBtn" class="btn-secondary">Copy ID</button>
+          <button id="camBtn" class="btn-secondary">Enable Webcam</button>
+        </div>
+        <div class="action-box">
+          <input id="joinIdInput" type="text" placeholder="Friend's Room ID" />
+          <button id="connectBtn" class="btn-blue">Join Friend</button>
+          <button id="soloBtn" class="btn-red">READY TO FIGHT!</button>
+        </div>
+      </div>
     </div>
 
     <p class="controls-hint">
@@ -59,35 +69,39 @@
     </p>
   </div>
 
+  <!-- Top Webcam Feeds -->
+  <div id="camContainer">
+    <div class="cam-box">
+      <video id="localVideo" autoplay muted playsinline></video>
+      <span>P1 (You)</span>
+    </div>
+    <div class="cam-box p2-cam">
+      <video id="remoteVideo" autoplay playsinline></video>
+      <span>P2 (Opponent)</span>
+    </div>
+  </div>
+
   <!-- Game Arena -->
   <canvas id="gameCanvas" width="1000" height="550"></canvas>
 
-  <!-- In-Game HUD & Webcams -->
+  <!-- In-Game Smash HUD -->
   <div id="hud" class="hidden">
-    <div class="cam-box">
-      <span>P1 (You)</span>
-      <video id="localVideo" autoplay muted playsinline></video>
-    </div>
     <div class="hud-card">
-      <span id="p1NameHud">P1</span>
-      <div id="p1PercentHud">0%</div>
-      <div id="p1StocksHud">●●●</div>
+      <div id="p1NameHud" class="hud-name">P1</div>
+      <div id="p1PercentHud" class="hud-percent">0%</div>
+      <div id="p1StocksHud" class="hud-stocks">●●●</div>
     </div>
-    <div class="hud-card">
-      <span id="p2NameHud">P2</span>
-      <div id="p2PercentHud">0%</div>
-      <div id="p2StocksHud">●●●</div>
-    </div>
-    <div class="cam-box">
-      <span>P2 (Opponent)</span>
-      <video id="remoteVideo" autoplay playsinline></video>
+    <div class="hud-card p2-card">
+      <div id="p2NameHud" class="hud-name">P2</div>
+      <div id="p2PercentHud" class="hud-percent">0%</div>
+      <div id="p2StocksHud" class="hud-stocks">●●●</div>
     </div>
   </div>
 
   <!-- Results Overlay -->
   <div id="resultsScreen" class="hidden">
     <h1 id="winnerText">GAME!</h1>
-    <button id="rematchBtn">Back to Character Select</button>
+    <button id="rematchBtn" class="btn-red">Back to Character Select</button>
   </div>
 
   <script src="fighters.js"></script>
