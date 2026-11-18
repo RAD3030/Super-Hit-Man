@@ -203,91 +203,254 @@ class StickFighter {
         document.getElementById("resultsScreen").classList.remove("hidden");
       }
     }
-  }
-  draw() {
+  }  draw() {
     ctx.save();
-    ctx.strokeStyle = this.stats.color;
-    ctx.fillStyle = this.stats.color;
-    ctx.lineWidth = 4;
-    ctx.lineCap = "round";
 
-    const headY = this.y - 54;
-    const shoulderY = this.y - 40;
-    const hipY = this.y - 20;
-    const stride = Math.sin(this.animFrame) * 10;
+    const c = this.stats.color;
+    const f = this.facing;
 
-    // Head
+    // 1. Ground Shadow
+    ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
     ctx.beginPath();
-    ctx.arc(this.x, headY, 9, 0, Math.PI * 2);
+    ctx.ellipse(this.x, this.y + 2, this.grounded ? 18 : 11, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dynamic lean & squash/stretch
+    const tilt = this.hitstun > 0 ? -f * 0.35 : (this.vx * 0.035);
+    const bounce = this.grounded ? Math.abs(Math.sin(this.animFrame)) * 3 : 0;
+
+    ctx.translate(this.x, this.y);
+    ctx.rotate(tilt);
+
+    const hipY = -22 + bounce;
+    const shoulderY = -42 + bounce;
+    const headY = -57 + bounce;
+    const stride = this.grounded ? Math.sin(this.animFrame) * 11 : 7;
+
+    // Helper to draw outlined, shaded limb
+    const drawLimb = (x1, y1, x2, y2, width, color) => {
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#0b0d14";
+      ctx.lineWidth = width + 4;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    };
+
+    // 2. Back Arm
+    const backArmX = -f * (this.attackTimer > 0 ? 12 : 8 + stride * 0.4);
+    drawLimb(0, shoulderY + 2, backArmX, shoulderY + 13, 6, c);
+
+    // 3. Back & Front Legs + Boots
+    const backFootX = -stride;
+    const frontFootX = stride;
+    const backFootY = this.grounded ? 0 : -5;
+    const frontFootY = this.grounded ? 0 : -2;
+
+    drawLimb(-2, hipY, backFootX, backFootY - 3, 7, c);
+    drawLimb(2, hipY, frontFootX, frontFootY - 3, 7, c);
+
+    // Boots / Shoes
+    ctx.fillStyle = "#1e2436";
+    ctx.strokeStyle = "#0b0d14";
+    ctx.lineWidth = 2;
+    [backFootX, frontFootX].forEach((fx, idx) => {
+      const fy = idx === 0 ? backFootY : frontFootY;
+      ctx.beginPath();
+      ctx.ellipse(fx + f * 3, fy - 2, 7, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    });
+
+    // 4. Muscular / Armored Torso
+    ctx.fillStyle = c;
+    ctx.strokeStyle = "#0b0d14";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-9, shoulderY - 2);
+    ctx.lineTo(9, shoulderY - 2);
+    ctx.lineTo(6, hipY + 2);
+    ctx.lineTo(-6, hipY + 2);
+    ctx.closePath();
+    ctx.fill();
     ctx.stroke();
 
-    // Hats & Gear
-    if (this.stats.hat === "cap") {
-      ctx.fillRect(this.x - 9, headY - 12, 18 + this.facing * 5, 5);
-    } else if (this.stats.hat === "visor") {
-      ctx.fillStyle = "#00ffff";
-      ctx.fillRect(this.x + (this.facing === 1 ? 1 : -9), headY - 4, 8, 4);
-    } else if (this.stats.hat === "pointy") {
+    // Chest Highlight Stripe
+    ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
+    ctx.beginPath();
+    ctx.moveTo(-4, shoulderY);
+    ctx.lineTo(2, shoulderY);
+    ctx.lineTo(0, hipY);
+    ctx.lineTo(-3, hipY);
+    ctx.closePath();
+    ctx.fill();
+
+    // Tie Gear
+    if (this.stats.hat === "tie") {
+      ctx.fillStyle = "#ff2e2e";
       ctx.beginPath();
-      ctx.moveTo(this.x - 9, headY - 7);
-      ctx.lineTo(this.x + 9, headY - 7);
-      ctx.lineTo(this.x - this.facing * 12, headY - 22);
+      ctx.moveTo(f * 2, shoulderY + 1);
+      ctx.lineTo(f * 6, shoulderY + 12);
+      ctx.lineTo(f * 2, shoulderY + 16);
+      ctx.lineTo(-f * 2, shoulderY + 12);
       ctx.closePath();
       ctx.fill();
-    } else if (this.stats.hat === "tie") {
-      ctx.fillStyle = "#ff3b3b";
-      ctx.fillRect(this.x + this.facing * 2 - 2, shoulderY + 2, 4, 12);
     }
 
-    // Torso
+    // 5. Shaded Head & Expressive Eyes
+    const headGrad = ctx.createRadialGradient(-3, headY - 4, 2, 0, headY, 12);
+    headGrad.addColorStop(0, "#ffffff");
+    headGrad.addColorStop(0.25, c);
+    headGrad.addColorStop(1, "#111522");
+
+    ctx.fillStyle = headGrad;
+    ctx.strokeStyle = "#0b0d14";
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(this.x, shoulderY - 5);
-    ctx.lineTo(this.x, hipY);
+    ctx.arc(0, headY, 11, 0, Math.PI * 2);
+    ctx.fill();
     ctx.stroke();
 
-    // Legs
-    ctx.beginPath();
-    ctx.moveTo(this.x, hipY);
-    ctx.lineTo(this.x - stride, this.y);
-    ctx.moveTo(this.x, hipY);
-    ctx.lineTo(this.x + stride, this.y);
-    ctx.stroke();
-
-    // Arms & Attack Pose
-    const punchReach = this.attackTimer > 0 ? 32 : 12;
-    ctx.beginPath();
-    ctx.moveTo(this.x, shoulderY);
-    ctx.lineTo(this.x + this.facing * punchReach, shoulderY + (this.attackTimer > 0 ? -4 : 10));
-    ctx.stroke();
-
-    // Weapons
-    if (this.stats.weapon === "sword") {
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 3;
+    // Eyes (or Visor)
+    if (this.stats.hat === "visor") {
+      ctx.fillStyle = "#00f7ff";
+      ctx.shadowColor = "#00f7ff";
+      ctx.shadowBlur = 8;
+      ctx.fillRect(f === 1 ? 1 : -10, headY - 4, 9, 5);
+      ctx.shadowBlur = 0;
+    } else {
+      ctx.fillStyle = "#ffffff";
       ctx.beginPath();
-      ctx.moveTo(this.x + this.facing * punchReach, shoulderY);
-      ctx.lineTo(this.x + this.facing * (punchReach + 26), shoulderY - 18);
-      ctx.stroke();
-    } else if (this.stats.weapon === "blaster") {
-      ctx.fillStyle = "#95a5a6";
-      ctx.fillRect(this.x + this.facing * punchReach - 4, shoulderY - 6, 12 * this.facing, 7);
-    }
-
-    // Shield Bubble
-    if (this.shielding) {
-      ctx.fillStyle = this.isPlayer1 ? "rgba(255, 60, 60, 0.35)" : "rgba(60, 160, 255, 0.35)";
-      ctx.beginPath();
-      ctx.arc(this.x, this.y - 32, 34, 0, Math.PI * 2);
+      ctx.ellipse(f * 5, headY - 1, 2.5, 3.5, 0, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    // Counter Aura
-    if (this.counterTimer > 0) {
+    // Hats & Helmets
+    if (this.stats.hat === "cap") {
+      ctx.fillStyle = c;
+      ctx.strokeStyle = "#0b0d14";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, headY - 3, 11, Math.PI, 0);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillRect(f === 1 ? -2 : -14, headY - 5, 16, 4);
+    } else if (this.stats.hat === "pointy") {
+      ctx.fillStyle = c;
+      ctx.strokeStyle = "#0b0d14";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-10, headY - 6);
+      ctx.lineTo(10, headY - 6);
+      ctx.lineTo(-f * 16, headY - 24);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    // 6. Front Arm, Gloves & Weapons
+    const punchReach = this.attackTimer > 0 ? 30 : 11;
+    const handX = f * punchReach;
+    const handY = shoulderY + (this.attackTimer > 0 ? -3 : 11);
+    drawLimb(0, shoulderY + 2, handX, handY, 6, c);
+
+    // Glove / Fist
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#0b0d14";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(handX, handY, this.attackTimer > 0 ? 6 : 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Punch Shockwave Effect
+    if (this.attackTimer > 6 && this.stats.weapon === "none") {
       ctx.strokeStyle = this.stats.specialColor;
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.arc(this.x, this.y - 32, 38, 0, Math.PI * 2);
+      ctx.arc(handX + f * 6, handY, 12, -0.8, 0.8);
       ctx.stroke();
+    }
+
+    // Glowing Energy Sword & Slash Arc
+    if (this.stats.weapon === "sword") {
+      const tipX = handX + f * 28;
+      const tipY = handY - 24;
+
+      // Sword Blade
+      ctx.strokeStyle = "#74b9ff";
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(handX, handY);
+      ctx.lineTo(tipX, tipY);
+      ctx.stroke();
+
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(handX, handY);
+      ctx.lineTo(tipX, tipY);
+      ctx.stroke();
+
+      // Hilt
+      ctx.strokeStyle = "#f1c40f";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(handX - f * 3, handY - 4);
+      ctx.lineTo(handX + f * 3, handY + 4);
+      ctx.stroke();
+
+      // Slash Crescent when swinging
+      if (this.attackTimer > 4) {
+        ctx.strokeStyle = this.stats.specialColor;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(handX, handY, 34, f === 1 ? -1.1 : 2.0, f === 1 ? 0.5 : 3.6);
+        ctx.stroke();
+      }
+    } else if (this.stats.weapon === "blaster") {
+      ctx.fillStyle = "#2d3436";
+      ctx.strokeStyle = "#0b0d14";
+      ctx.lineWidth = 2;
+      ctx.fillRect(f === 1 ? handX - 2 : handX - 16, handY - 6, 18, 9);
+      ctx.strokeRect(f === 1 ? handX - 2 : handX - 16, handY - 6, 18, 9);
+
+      // Barrel Glow
+      ctx.fillStyle = this.stats.specialColor;
+      ctx.fillRect(f === 1 ? handX + 14 : handX - 18, handY - 4, 4, 5);
+    }
+
+    // 7. Glossy Smash Shield Bubble
+    if (this.shielding) {
+      const shieldGrad = ctx.createRadialGradient(0, -32, 6, 0, -32, 36);
+      shieldGrad.addColorStop(0, "rgba(255, 255, 255, 0.05)");
+      shieldGrad.addColorStop(0.75, this.isPlayer1 ? "rgba(255, 59, 59, 0.35)" : "rgba(59, 158, 255, 0.35)");
+      shieldGrad.addColorStop(1, this.isPlayer1 ? "rgba(255, 120, 120, 0.8)" : "rgba(120, 200, 255, 0.8)");
+
+      ctx.fillStyle = shieldGrad;
+      ctx.beginPath();
+      ctx.arc(0, -32, 36, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 8. Counter Aura Ring
+    if (this.counterTimer > 0) {
+      ctx.strokeStyle = this.stats.specialColor;
+      ctx.shadowColor = this.stats.specialColor;
+      ctx.shadowBlur = 12;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(0, -32, 40, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
     }
 
     ctx.restore();
