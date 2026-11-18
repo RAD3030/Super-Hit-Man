@@ -187,10 +187,13 @@ class StickFighter {
 
         if (dx < reach && dy < 45) {
           const dmg = this.attackType === "special" ? this.stats.specialDamage : this.stats.normalDamage;
-          applySmashKnockback(opponent, dmg, this.facing, this);
-        }
-      }
-    }  draw() {
+                applySmashKnockback(opponent, dmg, this.facing, this);
+    }
+  }
+}
+
+draw() {
+
     ctx.save();
     ctx.strokeStyle = this.stats.color;
     ctx.fillStyle = this.stats.color;
