@@ -79,6 +79,7 @@ class StickFighter {
     this.hitstun = 0;
     this.attackTimer = 0;
     this.attackType = null;
+    this.hasHit=false;
     this.shielding = false;
     this.counterTimer = 0;
     this.animFrame = 0;
@@ -118,11 +119,13 @@ class StickFighter {
     if (keys.normalPressed && this.attackTimer <= 0) {
       this.attackTimer = 14;
       this.attackType = "normal";
+      this.hasHit = false;
     }
 
     if (keys.specialPressed && this.attackTimer <= 0) {
       this.attackTimer = 20;
       this.attackType = "special";
+      this.hasHit = false;
       this.triggerSpecial();
     }
   }
@@ -175,18 +178,24 @@ class StickFighter {
       }
     }
 
-    // Active Melee Hitbox Check
+      // Active Melee Hitbox Check
     if (this.attackTimer > 0) {
       this.attackTimer--;
-      if (this.attackTimer === 8 && this.stats.specialType !== "counter") {
-        const reach = this.stats.weapon === "sword" ? 68 : 48;
-        const hitX = this.x + this.facing * (reach * 0.6);
-        const dx = Math.abs(hitX - opponent.x);
-        const dy = Math.abs(this.y - 30 - (opponent.y - 30));
 
-        if (dx < reach && dy < 45) {
-          const dmg = this.attackType === "special" ? this.stats.specialDamage : this.stats.normalDamage;
+      const isMeleeSpecial = this.attackType === "special" && 
+        (this.stats.specialType === "dash" || this.stats.specialType === "uppercut");
+      const isNormalAttack = this.attackType === "normal";
+
+      if (!this.hasHit && this.attackTimer >= 5 && this.attackTimer <= 11 && (isNormalAttack || isMeleeSpecial)) {
+        const reach = this.stats.weapon === "sword" ? 72 : 54;
+        const hitX = this.x + this.facing * (reach * 0.55);
+        const dx = Math.abs(hitX - opponent.x);
+        const dy = Math.abs((this.y - 30) - (opponent.y - 30));
+
+        if (dx < reach && dy < 50) {
+          const dmg = (this.attackType === "special" ? this.stats.specialDamage : this.stats.normalDamage) || 10;
           applySmashKnockback(opponent, dmg, this.facing, this);
+          this.hasHit = true;
         }
       }
     }
