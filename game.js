@@ -378,32 +378,43 @@ document.getElementById("copyBtn").onclick = () => {
   setTimeout(() => (document.getElementById("copyBtn").textContent = "Copy ID"), 1500);
 };
 
-// PeerJS Chromebook Multiplayer
-const peer = new Peer();
+// PeerJS Chromebook Multiplayer (Safe Offline Fallback)
+let peer = null;
 let conn = null;
 let isHost = true;
 let isMultiplayer = false;
 
-peer.on("open", (id) => {
-  document.getElementById("myId").textContent = id;
-});
-
-peer.on("connection", (incomingConn) => {
-  conn = incomingConn;
-  isHost = true;
-  isMultiplayer = true;
-  setupConnectionHandlers();
-  startGame();
-});
-
-peer.on("call", (call) => {
-  call.answer(localStream);
-  call.on("stream", (remoteStream) => {
-    document.getElementById("remoteVideo").srcObject = remoteStream;
-  });
-});
+try {
+  if (typeof Peer !== "undefined") {
+    peer = new Peer();
+    peer.on("open", (id) => {
+      document.getElementById("myId").textContent = id;
+    });
+    peer.on("connection", (incomingConn) => {
+      conn = incomingConn;
+      isHost = true;
+      isMultiplayer = true;
+      setupConnectionHandlers();
+      startGame();
+    });
+    peer.on("call", (call) => {
+      call.answer(localStream);
+      call.on("stream", (remoteStream) => {
+        document.getElementById("remoteVideo").srcObject = remoteStream;
+      });
+    });
+  } else {
+    document.getElementById("myId").textContent = "Offline (Solo Ready)";
+  }
+} catch (err) {
+  document.getElementById("myId").textContent = "Offline (Solo Ready)";
+}
 
 document.getElementById("connectBtn").onclick = () => {
+  if (!peer) {
+    alert("Multiplayer requires an internet connection to PeerJS.");
+    return;
+  }
   const friendId = document.getElementById("joinIdInput").value.trim();
   if (!friendId) return;
   isHost = false;
@@ -537,6 +548,12 @@ function gameLoop() {
   // Update Smash HUD
   document.getElementById("p1PercentHud").textContent = `${Math.floor(p1.percent)}%`;
   document.getElementById("p2PercentHud").textContent = `${Math.floor(p2.percent)}%`;
+  document.getElementById("p1StocksHud").textContent = "●".repeat(Math.max(0, p1.stocks));
+  document.getElementById("p2StocksHud").textContent = "●".repeat(Math.max(0, p2.stocks));
+
+  requestAnimationFrame(gameLoop);
+}
+
   document.getElementById("p1StocksHud").textContent = "●".repeat(Math.max(0, p1.stocks));
   document.getElementById("p2StocksHud").textContent = "●".repeat(Math.max(0, p2.stocks));
 
