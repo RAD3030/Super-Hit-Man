@@ -88,5 +88,5 @@ const FIGHTERS = {
 "86_mythra": { name: "86. Radiant Aegis", color: "#ffeaa7", hat: "visor", weapon: "sword", speed: 7.2, jumpForce: 13.8, weight: 0.92, maxJumps: 2, normalDamage: 8, specialType: "dash", specialColor: "#81ecec", specialDamage: 13 },
 "87_kazuya": { name: "87. Devil Mishima", color: "#6c5ce7", hat: "none", weapon: "none", speed: 4.8, jumpForce: 12.4, weight: 1.15, maxJumps: 2, normalDamage: 14, specialType: "projectile", specialColor: "#ff3b3b", specialDamage: 17 },
 "88_sora": { name: "88. Keyblade Bearer", color: "#e74c3c", hat: "none", weapon: "sword", speed: 5.6, jumpForce: 14.2, weight: 0.85, maxJumps: 3, normalDamage: 9, specialType: "projectile", specialColor: "#74b9ff", specialDamage: 13 },
-"89_sandbag": { name: "89. Bonus Sandbag", color: "#dfe6e9", hat: "none", weapon: "none", speed: 3.5, jumpForce: 10.0, weight: 1.5, maxJumps: 1, normalDamage: 5, specialType: "counter", specialColor: "#ffffff", specialDamage: 10 }
+"89_sandbag": { name: "89. Bonus Sandbag", color: "#dfe6e9", hat: "none", weapon: "none", speed: 3.5, jumpForce: 10.0, weight: 1.5, maxJumps: 1, normalDamage: 5, specialType: "counter", specialColor: "#ffffff", specialDamage: 10 },
 };
