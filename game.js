@@ -1258,8 +1258,3 @@ document.getElementById("p2StocksHud").textContent = "●".repeat(Math.max(0, p2
 
 requestAnimationFrame(gameLoop);
 }
-document.getElementById("p1StocksHud").textContent = "●".repeat(Math.max(0, p1.stocks));
-document.getElementById("p2StocksHud").textContent = "●".repeat(Math.max(0, p2.stocks));
-requestAnimationFrame(gameLoop);
-};
-
