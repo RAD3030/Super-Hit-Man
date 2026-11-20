@@ -1026,6 +1026,14 @@ document.getElementById("camBtn").onclick = async () => {
     alert("Could not access Chromebook camera. Check browser permissions.");
   }
 };
+document.getElementById("muteToggleBtn").onclick = () => {
+  if (!localStream) return;
+  const audioTrack = localStream.getAudioTracks()[0];
+  if (audioTrack) {
+    audioTrack.enabled = !audioTrack.enabled;
+    document.getElementById("muteToggleBtn").textContent = audioTrack.enabled ? "🔊 Mute Mic" : "🔇 Unmute Mic";
+  }
+};
 
 document.getElementById("copyBtn").onclick = () => {
   const idText = document.getElementById("myId").textContent;
