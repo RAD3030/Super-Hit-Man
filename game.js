@@ -1243,8 +1243,13 @@ ctx.fill();
 p1.draw();
 p2.draw();
 // Update Smash HUD
-document.getElementById("p1PercentHud").textContent = ${Math.floor(p1.percent)}%;
-document.getElementById("p2PercentHud").textContent = ${Math.floor(p2.percent)}%;
+document.getElementById("p1PercentHud").textContent = `${Math.floor(p1.percent)}%`;
+document.getElementById("p2PercentHud").textContent = `${Math.floor(p2.percent)}%`;
+document.getElementById("p1StocksHud").textContent = "●".repeat(Math.max(0, p1.stocks));
+document.getElementById("p2StocksHud").textContent = "●".repeat(Math.max(0, p2.stocks));
+
+requestAnimationFrame(gameLoop);
+}
 document.getElementById("p1StocksHud").textContent = "●".repeat(Math.max(0, p1.stocks));
 document.getElementById("p2StocksHud").textContent = "●".repeat(Math.max(0, p2.stocks));
 requestAnimationFrame(gameLoop);
