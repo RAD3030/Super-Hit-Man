@@ -5,40 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Super Hit Men Ultimate</title>
   <link rel="stylesheet" href="style.css" />
+  <!-- PeerJS for Chromebook-to-Chromebook Online Multiplayer & Voice/Video -->
   <script src="https://unpkg.com"></script>
 </head>
 <body>
-  <!-- LOBBY / CHARACTER SELECT -->
+
+  <!-- CHARACTER SELECT & MATCH LOBBY -->
   <div id="lobby">
     <div class="menu-header">
       <h1>SUPER HIT MEN <span>ULTIMATE</span></h1>
+
       <div class="rules-bar">
-        <label>Mode:
+        <label>
+          Mode:
           <select id="modeSelect">
             <option value="solo">1P vs CPU Bot</option>
             <option value="local2p">2P Same Chromebook</option>
+            <option value="online">2P Online (Chromebooks)</option>
             <option value="training">1P Training Dummy</option>
           </select>
         </label>
-        <label>Stocks:
+
+        <label>
+          Stocks:
           <select id="stockSelect">
             <option value="1">1 Stock</option>
             <option value="3" selected>3 Stocks</option>
             <option value="5">5 Stocks</option>
           </select>
         </label>
-        <label>Stadium:
+
+        <label>
+          Stadium:
           <select id="stageSelect">
-            <option value="battlefield">Battlefield (3 Platforms)</option>
+            <option value="battlefield" selected>Battlefield (3 Platforms)</option>
             <option value="final">Final Destination (Flat)</option>
             <option value="towers">Twin Towers (High)</option>
+            <option value="fountain">Fountain of Dreams</option>
             <option value="stadium">Pokemon Stadium (2 Wide)</option>
             <option value="smashville">Smashville (Moving Platform)</option>
             <option value="temple">Hyrule Temple (Multi-Tier)</option>
+            <option value="yoshi">Yoshi's Story (Tri-Plat)</option>
           </select>
         </label>
-        <label>Sky Items:
-          <select id="itemsSelect">
+
+        <label>
+          Sky Items:
+          <select id="itemSelect">
             <option value="on" selected>ON (All Power-Ups)</option>
             <option value="off">OFF</option>
           </select>
@@ -46,48 +59,50 @@
       </div>
     </div>
 
-    <!-- PICK TARGET TOGGLE FOR LOCAL 2P -->
-    <div class="picker-bar">
-      <button id="pickP1Btn" class="pick-tab active-p1">Picking for P1</button>
-      <button id="pickP2Btn" class="pick-tab">Picking for P2 / CPU</button>
-      <span class="picker-hint">Click any fighter tile below to assign them!</span>
+    <!-- PLAYER USERNAMES & TARGET TOGGLE -->
+    <div class="user-bar">
+      <div class="user-input-group p1-border">
+        <span class="badge p1-badge">P1</span>
+        <input type="text" id="p1Username" value="Player1" maxlength="14" placeholder="P1 Username" />
+        <span class="pick-tag" id="p1PickLabel">01. Red Plumber</span>
+      </div>
+
+      <div class="select-target-toggle">
+        <button type="button" id="targetP1Btn" class="btn-secondary active-target">Picking for P1</button>
+        <button type="button" id="targetP2Btn" class="btn-secondary">Picking for P2 / CPU</button>
+        <span>Click any fighter tile below to assign them!</span>
+      </div>
+
+      <div class="user-input-group p2-border">
+        <span class="badge p2-badge">P2</span>
+        <input type="text" id="p2Username" value="CPU_Bot" maxlength="14" placeholder="P2 Username" />
+        <span class="pick-tag" id="p2PickLabel">02. Giant Gorilla</span>
+      </div>
     </div>
 
-    <!-- 89 FIGHTER GRID -->
+    <!-- 89-FIGHTER ROSTER GRID -->
     <div id="rosterGrid" class="roster-grid"></div>
 
-    <!-- BOTTOM PANEL -->
+    <!-- SELECTED FIGHTER PREVIEW & ONLINE / VOICE CONTROLS -->
     <div class="bottom-panel">
-      <div class="selected-cards-wrap">
-        <div class="selected-card">
-          <div class="badge p1-badge">P1</div>
-          <div>
-            <input type="text" id="p1UsernameInput" placeholder="Enter P1 Username *" maxlength="16" />
-            <h2 id="selectedName">01. Red Plumber</h2>
-            <p id="selectedStats">Speed: 5.5 | Weight: 1.0 | Jumps: 2 | Special: PROJECTILE</p>
-          </div>
-        </div>
-
-        <div class="selected-card p2-select-card">
-          <div class="badge p2-badge">P2</div>
-          <div>
-            <input type="text" id="p2UsernameInput" placeholder="P2 Username (Local 2P)" maxlength="16" />
-            <h2 id="p2SelectedName">02. Giant Gorilla</h2>
-            <p id="p2SelectedStats">CPU / Player 2 Fighter</p>
-          </div>
-        </div>
+      <div class="selected-card">
+        <h2 id="selectedName">01. Red Plumber</h2>
+        <p id="selectedStats">Speed: 5.5 | Weight: 1.0 | Jumps: 2 | Final Smash: SUPER FLAME WAVE</p>
       </div>
 
       <div class="network-controls">
-        <div class="room-box">
-          <span>Online Room ID: <strong id="myId">Connecting...</strong></span>
-          <button id="copyBtn" class="btn-secondary">Copy ID</button>
-          <button id="camBtn" class="btn-secondary">Webcam</button>
+        <!-- Online Room Controls (Shown when Online Mode is chosen or always accessible) -->
+        <div id="onlineControls" class="room-box hidden">
+          <span>Room Code: <strong id="myId">Connecting...</strong></span>
+          <button type="button" id="copyBtn" class="btn-secondary">Copy Code</button>
+          <input type="text" id="joinIdInput" placeholder="Enter Friend's Code" maxlength="10" />
+          <button type="button" id="connectBtn" class="btn-blue">Join Friend</button>
         </div>
+
         <div class="action-box">
-          <input type="text" id="joinIdInput" placeholder="Friend's Room ID" />
-          <button id="connectBtn" class="btn-blue">Join Online Friend</button>
-          <button id="soloBtn" class="btn-red">READY TO FIGHT!</button>
+          <button type="button" id="micBtn" class="btn-secondary">🎤 Voice Mic</button>
+          <button type="button" id="camBtn" class="btn-secondary">📷 Cam + Mic</button>
+          <button type="button" id="startMatchBtn" class="btn-red">READY TO FIGHT!</button>
         </div>
       </div>
     </div>
@@ -98,45 +113,49 @@
     </div>
   </div>
 
-  <!-- WEBCAM OVERLAY -->
+  <!-- WEBCAM / VOICE OVERLAY BOXES -->
   <div id="camContainer">
     <div class="cam-box">
-      <video id="localVideo" autoplay muted playsinline></video>
-      <span id="p1CamLabel">P1</span>
+      <video id="localVideo" autoplay playsinline muted></video>
+      <span id="cam1Label">P1</span>
     </div>
     <div class="cam-box p2-cam">
       <video id="remoteVideo" autoplay playsinline></video>
-      <span id="p2CamLabel">P2</span>
+      <span id="cam2Label">P2</span>
     </div>
   </div>
 
-  <!-- GAME CANVAS -->
-  <canvas id="gameCanvas" width="1000" height="560"></canvas>
+  <!-- GAME ARENA CANVAS -->
+  <canvas id="gameCanvas" width="1000" height="540"></canvas>
 
-  <!-- SMASH HUD WITH FINAL SMASH METER -->
+  <!-- IN-GAME SMASH HUD -->
   <div id="hud" class="hidden">
     <div class="hud-card">
-      <div class="fs-bar-wrap"><div id="p1FsBar" class="fs-bar"></div></div>
-      <div id="p1FsLabel" class="fs-text">FINAL SMASH: 0%</div>
-      <div id="p1NameHud" class="hud-name">P1</div>
-      <div id="p1PercentHud" class="hud-percent">0%</div>
-      <div id="p1StocksHud" class="hud-stocks">●●●</div>
+      <div class="hud-name" id="p1NameHud">Player1</div>
+      <div class="hud-sub" id="p1FighterHud">01. Red Plumber</div>
+      <div class="hud-percent" id="p1PercentHud">0%</div>
+      <div class="hud-stocks" id="p1StocksHud">●●●</div>
     </div>
+
+    <div style="display: flex; align-items: center;">
+      <button type="button" id="muteToggleBtn" class="btn-secondary">🔊 Mute Mic</button>
+    </div>
+
     <div class="hud-card p2-card">
-      <div class="fs-bar-wrap"><div id="p2FsBar" class="fs-bar"></div></div>
-      <div id="p2FsLabel" class="fs-text">FINAL SMASH: 0%</div>
-      <div id="p2NameHud" class="hud-name">P2</div>
-      <div id="p2PercentHud" class="hud-percent">0%</div>
-      <div id="p2StocksHud" class="hud-stocks">●●●</div>
+      <div class="hud-name" id="p2NameHud">CPU_Bot</div>
+      <div class="hud-sub" id="p2FighterHud">02. Giant Gorilla</div>
+      <div class="hud-percent" id="p2PercentHud">0%</div>
+      <div class="hud-stocks" id="p2StocksHud">●●●</div>
     </div>
   </div>
 
-  <!-- RESULTS OVERLAY -->
+  <!-- GAME OVER / RESULTS OVERLAY -->
   <div id="resultsScreen" class="hidden">
-    <h1 id="winnerText">GAME!</h1>
-    <button id="rematchBtn" class="btn-red">Back to Character Select</button>
+    <h1 id="winnerText">PLAYER 1 WINS!</h1>
+    <button type="button" id="rematchBtn" class="btn-red">Back to Character Select</button>
   </div>
 
+  <!-- SCRIPTS (Make sure filenames match your folder) -->
   <script src="fighters.js"></script>
   <script src="game.js"></script>
 </body>
